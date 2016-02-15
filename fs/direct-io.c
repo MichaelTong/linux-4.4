@@ -421,6 +421,7 @@ static inline void dio_bio_submit(struct dio *dio, struct dio_submit *sdio)
 	{
 		dio->bios[dio->bio_cnt++] = bio;
 		bio->b1 = ktime_get();
+		printk("MikeT: %s %s %d, %d, %p\n", __FILE__, __func__, __LINE__, dio->bio_cnt-1, bio);
 	}
 	spin_lock_irqsave(&dio->bio_lock, flags);
 	dio->refcount++;
