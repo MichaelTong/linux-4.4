@@ -6,6 +6,7 @@
 #define __LINUX_BLK_TYPES_H
 
 #include <linux/types.h>
+#include <linux/ktime.h>
 
 struct bio_set;
 struct bio;
@@ -51,6 +52,7 @@ struct bio {
 	unsigned long		bi_rw;		/* bottom bits READ/WRITE,
 						 * top bits priority
 						 */
+	struct ktime_t b1,b2,e1,e2;
 
 	struct bvec_iter	bi_iter;
 

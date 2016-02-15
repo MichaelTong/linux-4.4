@@ -37,6 +37,9 @@
 #include <linux/uio.h>
 #include <linux/atomic.h>
 #include <linux/prefetch.h>
+//MikeT Added
+#include <linux/ktime.h>
+#include <linux/kallsyms.h>
 
 /*
  * How many user pages to map in one call to get_user_pages().  This determines
@@ -116,6 +119,11 @@ struct dio {
 	dio_iodone_t *end_io;		/* IO completion function */
 
 	void *private;			/* copy from map_bh.b_private */
+	
+	struct bio *bios[4];
+	int bio_cnt;
+	bool isRaid;
+	unsigned long long bio_time[4];
 
 	/* BIO completion state */
 	spinlock_t bio_lock;		/* protects BIO fields below */
@@ -228,6 +236,8 @@ static ssize_t dio_complete(struct dio *dio, loff_t offset, ssize_t ret,
 		bool is_async)
 {
 	ssize_t transferred = 0;
+	
+	printk("MikeT: %llu %llu %llu %llu", dio->bio_time[0],dio->bio_time[1],dio->bio_time[2],dio->bio_time[3]);
 
 	/*
 	 * AIO submission can race with bio completion to get here while
@@ -325,7 +335,16 @@ static void dio_bio_end_io(struct bio *bio)
 {
 	struct dio *dio = bio->bi_private;
 	unsigned long flags;
+	int i;
 
+	if(dio->isRaid && !dio->is_async)
+	{
+		bio->e1 = ktime_get();
+		for(i=0;i<4;i++)
+			if(dio->bios[i] == bio)
+				dio->bio_time[i] = ktime_to_ns(ktime_sub(bio->e1, bio->b1));
+	}
+		
 	spin_lock_irqsave(&dio->bio_lock, flags);
 	bio->bi_private = dio->bio_list;
 	dio->bio_list = bio;
@@ -391,7 +410,11 @@ static inline void dio_bio_submit(struct dio *dio, struct dio_submit *sdio)
 	unsigned long flags;
 
 	bio->bi_private = dio;
-
+	if(dio->isRaid && !dio->is_async)
+	{
+		dio->bios[dio->bio_cnt++] = bio;
+		bio->b1 = ktime_get();
+	}
 	spin_lock_irqsave(&dio->bio_lock, flags);
 	dio->refcount++;
 	spin_unlock_irqrestore(&dio->bio_lock, flags);
@@ -1078,6 +1101,26 @@ static inline int drop_refcount(struct dio *dio)
 	spin_unlock_irqrestore(&dio->bio_lock, flags);
 	return ret2;
 }
+/**
+ * MikeT:
+ * Use block_device to decide whether it is a RAID.
+ * Need improvement.
+ */
+static inline bool isRaid_(struct block_device *bdev, bool rw)
+{
+    struct request_queue *q = bdev_get_queue(bdev);
+    char *modname=NULL;
+    const char *name =NULL;
+    unsigned long kaoffset, kasize;
+    char namebuff[500];
+    name = kallsyms_lookup((unsigned long)(q->make_request_fn), &kasize, &kaoffset, &modname, namebuff);
+    //if(debuginfo & ( 1 << 1)) printk("MikeT: %s %s %d, %s %d\n",__FILE__,__func__,__LINE__, name, strcmp(name, "md_make_request"));
+    if(strcmp(name, "md_make_request")==0&&rw==READ)
+        return true;
+    else
+        return false;
+}
+
 
 /*
  * This is a library function for use by filesystem drivers.
@@ -1149,6 +1192,9 @@ do_blockdev_direct_IO(struct kiocb *iocb, struct inode *inode,
 	 * care to only zero out what's needed.
 	 */
 	memset(dio, 0, offsetof(struct dio, pages));
+	if(bdev)
+		dio->isRAID = isRaid_(bdev, rw);
+	dio->bio_cnt = 0;
 
 	dio->flags = flags;
 	if (dio->flags & DIO_LOCKING) {
