@@ -1758,7 +1758,7 @@ void bio_endio(struct bio *bio)
 			if(bio_flagged(parent, 9))
 			{
 				bio->e1 = ktime_get();
-				(*(parent->bio_time))[(bio->bi_iter.bi_sector - dio->sector)/bio_sectors(bio)] 
+				(*(parent->bio_time))[(bio->bi_iter.bi_sector - parent->ori_sector)/bio_sectors(bio)] 
 							= ktime_to_ns(ktime_sub(bio->e1, bio->b1));
 			}
 			bio_put(bio);
@@ -1768,7 +1768,7 @@ void bio_endio(struct bio *bio)
 			if(bio_flagged(bio, 9))
 			{
 				bio->e1 = ktime_get();
-				(*(bio->bio_time))[(bio->bi_iter.bi_sector - dio->sector)/bio_sectors(bio)] 
+				(*(bio->bio_time))[(bio->bi_iter.bi_sector - bio->ori_sector)/bio_sectors(bio)] 
 							= ktime_to_ns(ktime_sub(bio->e1, bio->b1));
 			}
 			if (bio->bi_end_io)
