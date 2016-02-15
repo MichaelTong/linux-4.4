@@ -122,7 +122,7 @@ struct dio {
 	
 	struct bio *bios[4];
 	int bio_cnt;
-	bool isRaid;
+	bool isRAID;
 	unsigned long long bio_time[4];
 
 	/* BIO completion state */
