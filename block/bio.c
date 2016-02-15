@@ -28,6 +28,8 @@
 #include <linux/mempool.h>
 #include <linux/workqueue.h>
 #include <linux/cgroup.h>
+//MikeT Added
+#include <linux/blk_types.h>
 
 #include <trace/events/block.h>
 
