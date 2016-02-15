@@ -460,11 +460,6 @@ static void raid0_make_request(struct mddev *mddev, struct bio *bio)
 	struct strip_zone *zone;
 	struct md_rdev *tmp_dev;
 	struct bio *split;
-	
-	//MikeT Added
-	struct dio *dio=NULL;
-	if(test_bit(9, &bio->bi_flags))
-		dio = bio->bi_private;
 
 	if (unlikely(bio->bi_rw & REQ_FLUSH)) {
 		md_flush_request(mddev, bio);
@@ -496,7 +491,7 @@ static void raid0_make_request(struct mddev *mddev, struct bio *bio)
 		split->bi_iter.bi_sector = sector + zone->dev_start +
 			tmp_dev->data_offset;
 		//MikeT Added, record sent time for split
-		if(dio!=NULL && !dio->is_async)
+		if(bio_flagged(bio, 9))
 		{
 			bio_set_flag(split, 9);
 			split->b1 = ktime_get();
