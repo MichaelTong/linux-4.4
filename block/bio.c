@@ -31,7 +31,6 @@
 
 #include <trace/events/block.h>
 
-#include <linux/fs.h>
 /*
  * Test patch to inline a certain number of bi_io_vec's inside the bio
  * itself, to shrink a bio data allocation from two mempool calls to one
@@ -1739,8 +1738,6 @@ static inline bool bio_remaining_done(struct bio *bio)
  **/
 void bio_endio(struct bio *bio)
 {
-	//MikeT added
-	struct dio *dio=NULL;
 	while (bio) {
 		if (unlikely(!bio_remaining_done(bio)))
 			break;
@@ -1756,13 +1753,12 @@ void bio_endio(struct bio *bio)
 		if (bio->bi_end_io == bio_chain_endio) {
 			struct bio *parent = bio->bi_private;
 			parent->bi_error = bio->bi_error;
+			
 			//MikeT added
-			if(bio_flagged(bio, 9))
-				dio = parent->bi_private;
-			if(dio!=NULL && dio->isRAID && !dio->is_async)
+			if(bio_flagged(parent, 9))
 			{
 				bio->e1 = ktime_get();
-				dio->bio_time[(bio->bi_iter.bi_sector - dio->sector)/bio_sectors(bio)] 
+				(*(parent->bio_time))[(bio->bi_iter.bi_sector - dio->sector)/bio_sectors(bio)] 
 							= ktime_to_ns(ktime_sub(bio->e1, bio->b1));
 			}
 			bio_put(bio);
@@ -1770,11 +1766,9 @@ void bio_endio(struct bio *bio)
 		} else {
 			//MikeT added
 			if(bio_flagged(bio, 9))
-				dio = bio->bi_private;
-			if(dio!=NULL && dio->isRAID && !dio->is_async)
 			{
 				bio->e1 = ktime_get();
-				dio->bio_time[(bio->bi_iter.bi_sector - dio->sector)/bio_sectors(bio)] 
+				(*(bio->bio_time))[(bio->bi_iter.bi_sector - dio->sector)/bio_sectors(bio)] 
 							= ktime_to_ns(ktime_sub(bio->e1, bio->b1));
 			}
 			if (bio->bi_end_io)

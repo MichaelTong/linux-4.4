@@ -53,6 +53,7 @@ struct bio {
 						 * top bits priority
 						 */
 	ktime_t b1,b2,e1,e2;
+	unsigned long long **bio_time;
 
 	struct bvec_iter	bi_iter;
 
