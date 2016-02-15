@@ -121,8 +121,7 @@ struct dio {
 	void *private;			/* copy from map_bh.b_private */
 	
 	bool isRAID;
-	unsigned long long bio_time[4];
-	sector_t sector;
+	unsigned long long *bio_time;
 
 	/* BIO completion state */
 	spinlock_t bio_lock;		/* protects BIO fields below */
@@ -236,8 +235,11 @@ static ssize_t dio_complete(struct dio *dio, loff_t offset, ssize_t ret,
 {
 	ssize_t transferred = 0;
 	//MikeT: Added
-	if(!dio->is_async)
+	if(!dio->is_async && dio->isRAID)
+	{
 		printk("MikeT: %llu %llu %llu %llu\n", dio->bio_time[0],dio->bio_time[1],dio->bio_time[2],dio->bio_time[3]);
+		kfree(dio->bio_time);
+	}
 
 	/*
 	 * AIO submission can race with bio completion to get here while
@@ -404,8 +406,9 @@ static inline void dio_bio_submit(struct dio *dio, struct dio_submit *sdio)
 	//MikeT Added
 	if(dio->isRAID && !dio->is_async)
 	{
-		dio->sector = bio->bi_iter.bi_sector;
+		bio->ori_sector = bio->bi_iter.bi_sector;
 		bio_set_flag(bio, 9);
+		dio->bio_time = (unsigned long long *)kmalloc(4*sizeof(unsigned long long), GFP_KERNEL);
 		bio->bio_time = &(dio->bio_time);
 	}
 		
