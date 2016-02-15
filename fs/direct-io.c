@@ -402,7 +402,7 @@ static inline void dio_bio_submit(struct dio *dio, struct dio_submit *sdio)
 
 	bio->bi_private = dio;
 	//MikeT Added
-	if(dio->isRAID && dio->!is_async)
+	if(dio->isRAID && !dio->is_async)
 	{
 		dio->sector = bio->bi_iter.bi_sector;
 		bio_set_flag(bio, 9);
