@@ -1757,9 +1757,17 @@ void bio_endio(struct bio *bio)
 			//MikeT added
 			if(bio_flagged(parent, 9))
 			{
+				int i;
 				bio->e1 = ktime_get();
-				printk("MikeT: %s %s %d, %lu, %llu, %p\n", __FILE__, __func__, __LINE__, bio->bi_iter.bi_sector, ktime_to_ns(ktime_sub(bio->e1, bio->b1)), bio);
-				printk("MikeT: %s %s %d, %lu, %lu\n", __FILE__, __func__, __LINE__, parent->ori_sector, parent->bi_iter.bi_sector);
+				for(i=0;i<4;i++)
+				{
+					if(parent->bios[i] == bio)
+					{
+						(*(parent->bio_time))[i] = ktime_to_ns(ktime_sub(bio->e1, bio->b1));
+						break;
+					}
+				}
+				//printk("MikeT: %s %s %d, %lu, %llu, %p\n", __FILE__, __func__, __LINE__, bio->bi_iter.bi_sector, ktime_to_ns(ktime_sub(bio->e1, bio->b1)), bio);
 				//(*(parent->bio_time))[(bio->bi_iter.bi_sector - parent->ori_sector)/bio_sectors(bio)] 
 				//			= ktime_to_ns(ktime_sub(bio->e1, bio->b1));
 			}
@@ -1769,8 +1777,17 @@ void bio_endio(struct bio *bio)
 			//MikeT added
 			if(bio_flagged(bio, 9))
 			{
+				int i;
 				bio->e1 = ktime_get();
-				printk("MikeT: %s %s %d, %lu, %llu, %p\n", __FILE__, __func__, __LINE__, bio->bi_iter.bi_sector, ktime_to_ns(ktime_sub(bio->e1, bio->b1)), bio);
+				for(i=0;i<4;i++)
+				{
+					if(bio->bios[i] == bio)
+					{
+						(*(bio->bio_time))[i] = ktime_to_ns(ktime_sub(bio->e1, bio->b1));
+						break;
+					}
+				}
+				//printk("MikeT: %s %s %d, %lu, %llu, %p\n", __FILE__, __func__, __LINE__, bio->bi_iter.bi_sector, ktime_to_ns(ktime_sub(bio->e1, bio->b1)), bio);
 				//(*(bio->bio_time))[(bio->bi_iter.bi_sector - bio->ori_sector)/bio_sectors(bio)] 
 				//			= ktime_to_ns(ktime_sub(bio->e1, bio->b1));
 			}
