@@ -52,7 +52,7 @@ struct bio {
 	unsigned long		bi_rw;		/* bottom bits READ/WRITE,
 						 * top bits priority
 						 */
-	struct ktime_t b1,b2,e1,e2;
+	ktime_t b1,b2,e1,e2;
 
 	struct bvec_iter	bi_iter;
 
