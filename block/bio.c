@@ -28,8 +28,6 @@
 #include <linux/mempool.h>
 #include <linux/workqueue.h>
 #include <linux/cgroup.h>
-//MikeT Added
-#include <linux/blk_types.h>
 
 #include <trace/events/block.h>
 
@@ -56,7 +54,6 @@ static struct biovec_slab bvec_slabs[BIOVEC_NR_POOLS] __read_mostly = {
  */
 struct bio_set *fs_bio_set;
 EXPORT_SYMBOL(fs_bio_set);
-struct dio;
 /*
  * Our slab pool management
  */
