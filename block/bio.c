@@ -1758,7 +1758,7 @@ void bio_endio(struct bio *bio)
 			if(bio_flagged(parent, 9))
 			{
 				bio->e1 = ktime_get();
-				printk("MikeT: %s %s %d, %llu", __FILE__, __func__, __LINE__, ktime_to_ns(ktime_sub(bio->e1, bio->b1)));
+				printk("MikeT: %s %s %d, %llu, %llu, %p\n", __FILE__, __func__, __LINE__, bio->bi_iter.bi_sector, ktime_to_ns(ktime_sub(bio->e1, bio->b1)), bio);
 				//(*(parent->bio_time))[(bio->bi_iter.bi_sector - parent->ori_sector)/bio_sectors(bio)] 
 				//			= ktime_to_ns(ktime_sub(bio->e1, bio->b1));
 			}
@@ -1769,7 +1769,7 @@ void bio_endio(struct bio *bio)
 			if(bio_flagged(bio, 9))
 			{
 				bio->e1 = ktime_get();
-				printk("MikeT: %s %s %d, %llu", __FILE__, __func__, __LINE__, ktime_to_ns(ktime_sub(bio->e1, bio->b1)));
+				printk("MikeT: %s %s %d, %llu, %p\n", __FILE__, __func__, __LINE__, bio->bi_iter.bi_sector, ktime_to_ns(ktime_sub(bio->e1, bio->b1)), bio);
 				//(*(bio->bio_time))[(bio->bi_iter.bi_sector - bio->ori_sector)/bio_sectors(bio)] 
 				//			= ktime_to_ns(ktime_sub(bio->e1, bio->b1));
 			}
