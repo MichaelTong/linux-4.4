@@ -120,10 +120,9 @@ struct dio {
 
 	void *private;			/* copy from map_bh.b_private */
 	
-	struct bio *bios[4];
-	int bio_cnt;
 	bool isRAID;
 	unsigned long long bio_time[4];
+	sector_t sector;
 
 	/* BIO completion state */
 	spinlock_t bio_lock;		/* protects BIO fields below */
@@ -336,20 +335,6 @@ static void dio_bio_end_io(struct bio *bio)
 {
 	struct dio *dio = bio->bi_private;
 	unsigned long flags;
-	int i;
-	//MikeT Added
-	if(dio->isRAID && !dio->is_async)
-	{
-		bio->e1 = ktime_get();
-		for(i=0;i<4;i++)
-		{
-			if(dio->bios[i] == bio)
-			{
-				dio->bio_time[i] = ktime_to_ns(ktime_sub(bio->e1, bio->b1));
-				break;
-			}
-		}
-	}
 		
 	spin_lock_irqsave(&dio->bio_lock, flags);
 	bio->bi_private = dio->bio_list;
@@ -417,12 +402,9 @@ static inline void dio_bio_submit(struct dio *dio, struct dio_submit *sdio)
 
 	bio->bi_private = dio;
 	//MikeT Added
-	if(dio->isRAID && !dio->is_async)
-	{
-		dio->bios[dio->bio_cnt++] = bio;
-		bio->b1 = ktime_get();
-		printk("MikeT: %s %s %d, %d, %p\n", __FILE__, __func__, __LINE__, dio->bio_cnt-1, bio);
-	}
+	dio->sector = bio->bi_iter.bi_sector;
+	bio_set_flag(bio, 9);
+		
 	spin_lock_irqsave(&dio->bio_lock, flags);
 	dio->refcount++;
 	spin_unlock_irqrestore(&dio->bio_lock, flags);

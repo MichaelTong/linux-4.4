@@ -25,6 +25,9 @@
 #include "raid0.h"
 #include "raid5.h"
 
+//MikeT Added
+#include <linux/ktime.h>
+
 static int raid0_congested(struct mddev *mddev, int bits)
 {
 	struct r0conf *conf = mddev->private;
@@ -457,6 +460,11 @@ static void raid0_make_request(struct mddev *mddev, struct bio *bio)
 	struct strip_zone *zone;
 	struct md_rdev *tmp_dev;
 	struct bio *split;
+	
+	//MikeT Added
+	struct dio *dio=NULL;
+	if(test_bit(9, &bio->bi_flags))
+		dio = bio->bi_private;
 
 	if (unlikely(bio->bi_rw & REQ_FLUSH)) {
 		md_flush_request(mddev, bio);
@@ -487,7 +495,13 @@ static void raid0_make_request(struct mddev *mddev, struct bio *bio)
 		split->bi_bdev = tmp_dev->bdev;
 		split->bi_iter.bi_sector = sector + zone->dev_start +
 			tmp_dev->data_offset;
-
+		//MikeT Added, record sent time for split
+		if(dio!=NULL && !dio->is_async)
+		{
+			bio_set_flag(split, 9);
+			split->b1 = ktime_get();
+		}
+			
 		if (unlikely((split->bi_rw & REQ_DISCARD) &&
 			 !blk_queue_discard(bdev_get_queue(split->bi_bdev)))) {
 			/* Just ignore it */
