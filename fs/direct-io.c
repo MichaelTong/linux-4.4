@@ -406,7 +406,7 @@ static inline void dio_bio_submit(struct dio *dio, struct dio_submit *sdio)
 	{
 		dio->sector = bio->bi_iter.bi_sector;
 		bio_set_flag(bio, 9);
-		bio->bio_time = &dio->bio_time;
+		bio->bio_time = &(dio->bio_time);
 	}
 		
 	spin_lock_irqsave(&dio->bio_lock, flags);
