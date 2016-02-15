@@ -55,7 +55,7 @@ struct bio {
 	ktime_t b1,b2,e1,e2;
 	unsigned long long **bio_time;
 	sector_t ori_sector;
-	struct bio bios[4];
+	struct bio *bios[4];
 
 	struct bvec_iter	bi_iter;
 
