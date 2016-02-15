@@ -1184,7 +1184,6 @@ do_blockdev_direct_IO(struct kiocb *iocb, struct inode *inode,
 	memset(dio, 0, offsetof(struct dio, pages));
 	if(bdev)
 		dio->isRAID = isRaid_(bdev, iov_iter_rw(iter));
-	dio->bio_cnt = 0;
 
 	dio->flags = flags;
 	if (dio->flags & DIO_LOCKING) {
