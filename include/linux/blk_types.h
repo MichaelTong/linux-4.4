@@ -17,7 +17,8 @@ struct io_context;
 struct cgroup_subsys_state;
 typedef void (bio_end_io_t) (struct bio *);
 typedef void (bio_destructor_t) (struct bio *);
-
+//MikeT added
+struct dio;
 /*
  * was unsigned short, but we might as well be ready for > 64kB I/O pages
  */

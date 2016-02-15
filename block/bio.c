@@ -1757,7 +1757,7 @@ void bio_endio(struct bio *bio)
 			struct bio *parent = bio->bi_private;
 			parent->bi_error = bio->bi_error;
 			//MikeT added
-			if(test_bit(9, &bio->bi_flags))
+			if(bio_flagged(bio, 9))
 				dio = parent->bi_private;
 			if(dio!=NULL && dio->isRAID && !dio->is_async)
 			{
@@ -1769,7 +1769,7 @@ void bio_endio(struct bio *bio)
 			bio = parent;
 		} else {
 			//MikeT added
-			if(test_bit(9, &bio->bi_flags))
+			if(bio_flagged(bio, 9))
 				dio = bio->bi_private;
 			if(dio!=NULL && dio->isRAID && !dio->is_async)
 			{
