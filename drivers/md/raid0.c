@@ -490,6 +490,9 @@ static void raid0_make_request(struct mddev *mddev, struct bio *bio)
 		split->bi_bdev = tmp_dev->bdev;
 		split->bi_iter.bi_sector = sector + zone->dev_start +
 			tmp_dev->data_offset;
+		
+			split->b1 = ktime_get();
+			printk("MikeT: %s %s %d, %p\n", __FILE__, __func__, __LINE__, split);
 		//MikeT Added, record sent time for split
 		if(bio_flagged(bio, 9))
 		{
