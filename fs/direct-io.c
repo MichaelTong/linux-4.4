@@ -337,7 +337,7 @@ static void dio_bio_end_io(struct bio *bio)
 	unsigned long flags;
 	int i;
 
-	if(dio->isRaid && !dio->is_async)
+	if(dio->isRAID && !dio->is_async)
 	{
 		bio->e1 = ktime_get();
 		for(i=0;i<4;i++)
@@ -410,7 +410,7 @@ static inline void dio_bio_submit(struct dio *dio, struct dio_submit *sdio)
 	unsigned long flags;
 
 	bio->bi_private = dio;
-	if(dio->isRaid && !dio->is_async)
+	if(dio->isRAID && !dio->is_async)
 	{
 		dio->bios[dio->bio_cnt++] = bio;
 		bio->b1 = ktime_get();
@@ -1193,7 +1193,7 @@ do_blockdev_direct_IO(struct kiocb *iocb, struct inode *inode,
 	 */
 	memset(dio, 0, offsetof(struct dio, pages));
 	if(bdev)
-		dio->isRAID = isRaid_(bdev, rw);
+		dio->isRAID = isRaid_(bdev, iov_iter_rw(iter);
 	dio->bio_cnt = 0;
 
 	dio->flags = flags;
