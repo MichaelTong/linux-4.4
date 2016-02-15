@@ -236,8 +236,9 @@ static ssize_t dio_complete(struct dio *dio, loff_t offset, ssize_t ret,
 		bool is_async)
 {
 	ssize_t transferred = 0;
-	
-	printk("MikeT: %llu %llu %llu %llu", dio->bio_time[0],dio->bio_time[1],dio->bio_time[2],dio->bio_time[3]);
+	//MikeT: Added
+	if(!dio->is_async)
+		printk("MikeT: %llu %llu %llu %llu\n", dio->bio_time[0],dio->bio_time[1],dio->bio_time[2],dio->bio_time[3]);
 
 	/*
 	 * AIO submission can race with bio completion to get here while
@@ -336,13 +337,18 @@ static void dio_bio_end_io(struct bio *bio)
 	struct dio *dio = bio->bi_private;
 	unsigned long flags;
 	int i;
-
+	//MikeT Added
 	if(dio->isRAID && !dio->is_async)
 	{
 		bio->e1 = ktime_get();
 		for(i=0;i<4;i++)
+		{
 			if(dio->bios[i] == bio)
+			{
 				dio->bio_time[i] = ktime_to_ns(ktime_sub(bio->e1, bio->b1));
+				break;
+			}
+		}
 	}
 		
 	spin_lock_irqsave(&dio->bio_lock, flags);
@@ -410,6 +416,7 @@ static inline void dio_bio_submit(struct dio *dio, struct dio_submit *sdio)
 	unsigned long flags;
 
 	bio->bi_private = dio;
+	//MikeT Added
 	if(dio->isRAID && !dio->is_async)
 	{
 		dio->bios[dio->bio_cnt++] = bio;
