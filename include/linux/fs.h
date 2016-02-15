@@ -52,6 +52,7 @@ struct swap_info_struct;
 struct seq_file;
 struct workqueue_struct;
 struct iov_iter;
+struct dio;
 
 extern void __init inode_init(void);
 extern void __init inode_init_early(void);

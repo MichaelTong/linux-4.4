@@ -17,9 +17,7 @@ struct io_context;
 struct cgroup_subsys_state;
 typedef void (bio_end_io_t) (struct bio *);
 typedef void (bio_destructor_t) (struct bio *);
-//MikeT added
-/* dio_state communicated between submission path and end_io */
-struct dio;
+
 /*
  * was unsigned short, but we might as well be ready for > 64kB I/O pages
  */
@@ -271,44 +269,5 @@ static inline unsigned int blk_qc_t_to_tag(blk_qc_t cookie)
 {
 	return cookie & ((1u << BLK_QC_T_SHIFT) - 1);
 }
-struct dio {
-	int flags;			/* doesn't change */
-	int rw;
-	blk_qc_t bio_cookie;
-	struct block_device *bio_bdev;
-	struct inode *inode;
-	loff_t i_size;			/* i_size when submitted */
-	dio_iodone_t *end_io;		/* IO completion function */
 
-	void *private;			/* copy from map_bh.b_private */
-	
-	bool isRAID;
-	unsigned long long bio_time[4];
-	sector_t sector;
-
-	/* BIO completion state */
-	spinlock_t bio_lock;		/* protects BIO fields below */
-	int page_errors;		/* errno from get_user_pages() */
-	int is_async;			/* is IO async ? */
-	bool defer_completion;		/* defer AIO completion to workqueue? */
-	bool should_dirty;		/* if pages should be dirtied */
-	int io_error;			/* IO error in completion path */
-	unsigned long refcount;		/* direct_io_worker() and bios */
-	struct bio *bio_list;		/* singly linked via bi_private */
-	struct task_struct *waiter;	/* waiting task (NULL if none) */
-
-	/* AIO related stuff */
-	struct kiocb *iocb;		/* kiocb */
-	ssize_t result;                 /* IO result */
-
-	/*
-	 * pages[] (and any fields placed after it) are not zeroed out at
-	 * allocation time.  Don't add new fields after pages[] unless you
-	 * wish that they not be zeroed.
-	 */
-	union {
-		struct page *pages[DIO_PAGES];	/* page buffer */
-		struct work_struct complete_work;/* deferred AIO completion */
-	};
-} ____cacheline_aligned_in_smp;
 #endif /* __LINUX_BLK_TYPES_H */

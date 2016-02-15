@@ -31,6 +31,7 @@
 
 #include <trace/events/block.h>
 
+#include <linux/fs.h>
 /*
  * Test patch to inline a certain number of bi_io_vec's inside the bio
  * itself, to shrink a bio data allocation from two mempool calls to one
