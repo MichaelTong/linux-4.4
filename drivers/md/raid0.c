@@ -494,6 +494,7 @@ static void raid0_make_request(struct mddev *mddev, struct bio *bio)
 		//MikeT Added
 		split->b1 = ktime_get();
 		bio->bios[i%4]=split;
+		printk("MikeT: r %d", i);
 		i++;
 			
 		if (unlikely((split->bi_rw & REQ_DISCARD) &&
