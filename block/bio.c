@@ -1755,7 +1755,7 @@ void bio_endio(struct bio *bio)
 			parent->bi_error = bio->bi_error;
 			
 			//MikeT added
-			if(bio_flagged(parent, 9))
+			if(bio_flagged(bio, 9))
 			{
 				int i;
 				bio->e1 = ktime_get();
@@ -1841,6 +1841,21 @@ struct bio *bio_split(struct bio *bio, int sectors,
 		bio_integrity_trim(split, 0, sectors);
 
 	bio_advance(bio, split->bi_iter.bi_size);
+	//MikeT added
+	if(bio_flagged(bio, 9))
+	{
+		int i;
+		for(i=0;i<4;i++)
+		{
+			if(bio->bios[i]==NULL)
+				break;
+		}
+		if(i<4)
+		{
+			bio->bios[i] = split;
+			bio_set_flags(split, 9);
+		}
+	}
 
 	return split;
 }

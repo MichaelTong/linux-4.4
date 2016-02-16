@@ -491,6 +491,11 @@ static void raid0_make_request(struct mddev *mddev, struct bio *bio)
 		split->bi_iter.bi_sector = sector + zone->dev_start +
 			tmp_dev->data_offset;
 		//MikeT Added
+		if(bio_flagged(split, 9))
+		{
+			split->b1 = ktime_get();
+			printk("MikeT: raid0 split %p\n", split);	
+		}
 			
 		if (unlikely((split->bi_rw & REQ_DISCARD) &&
 			 !blk_queue_discard(bdev_get_queue(split->bi_bdev)))) {
