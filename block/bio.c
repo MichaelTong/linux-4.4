@@ -1764,7 +1764,7 @@ void bio_endio(struct bio *bio)
 					if(parent->bios[i] == bio)
 					{
 						(*(parent->bio_time))[i] = ktime_to_ns(ktime_sub(bio->e1, bio->b1));
-						printk("MikeT: %d", i);
+						printk("MikeT: %d\n", i);
 						break;
 					}
 				}
@@ -1785,7 +1785,7 @@ void bio_endio(struct bio *bio)
 					if(bio->bios[i] == bio)
 					{
 						(*(bio->bio_time))[i] = ktime_to_ns(ktime_sub(bio->e1, bio->b1));
-						printk("MikeT: %d", i);
+						printk("MikeT: %d\n", i);
 						break;
 					}
 				}
