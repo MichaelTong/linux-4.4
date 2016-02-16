@@ -460,8 +460,6 @@ static void raid0_make_request(struct mddev *mddev, struct bio *bio)
 	struct strip_zone *zone;
 	struct md_rdev *tmp_dev;
 	struct bio *split;
-	int i=0;
-		printk("MikeT: r %d\n", i);
 
 	if (unlikely(bio->bi_rw & REQ_FLUSH)) {
 		md_flush_request(mddev, bio);
@@ -479,9 +477,6 @@ static void raid0_make_request(struct mddev *mddev, struct bio *bio)
 
 		/* Restore due to sector_div */
 		sector = bio->bi_iter.bi_sector;
-		printk("MikeT: sector %lu\n", sector);
-		printk("MikeT: sectors %lu\n", sectors);
-		printk("MikeT: sectors %lu\n", bio_sectors(bio));
 
 		if (sectors < bio_sectors(bio)) {
 			split = bio_split(bio, sectors, GFP_NOIO, fs_bio_set);
@@ -496,10 +491,6 @@ static void raid0_make_request(struct mddev *mddev, struct bio *bio)
 		split->bi_iter.bi_sector = sector + zone->dev_start +
 			tmp_dev->data_offset;
 		//MikeT Added
-		split->b1 = ktime_get();
-		bio->bios[i%4]=split;
-		printk("MikeT: r %d\n", i);
-		i++;
 			
 		if (unlikely((split->bi_rw & REQ_DISCARD) &&
 			 !blk_queue_discard(bdev_get_queue(split->bi_bdev)))) {
