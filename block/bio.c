@@ -1853,7 +1853,7 @@ struct bio *bio_split(struct bio *bio, int sectors,
 		if(i<4)
 		{
 			bio->bios[i] = split;
-			bio_set_flags(split, 9);
+			bio_set_flag(split, 9);
 		}
 	}
 
