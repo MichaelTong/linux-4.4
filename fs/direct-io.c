@@ -410,7 +410,7 @@ static inline void dio_bio_submit(struct dio *dio, struct dio_submit *sdio)
 		bio_set_flag(bio, 9);
 		dio->bio_time = (unsigned long long *)kmalloc(4*sizeof(unsigned long long), GFP_KERNEL);
 		bio->bio_time = &(dio->bio_time);
-		printk("MikeT: direct io bio %p\n", bio);
+		bio->bios[3] = bio;
 	}
 		
 	spin_lock_irqsave(&dio->bio_lock, flags);

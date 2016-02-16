@@ -494,7 +494,6 @@ static void raid0_make_request(struct mddev *mddev, struct bio *bio)
 		if(bio_flagged(split, 9))
 		{
 			split->b1 = ktime_get();
-			printk("MikeT: raid0 split %p\n", split);	
 		}
 			
 		if (unlikely((split->bi_rw & REQ_DISCARD) &&
